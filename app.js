@@ -337,10 +337,11 @@ async function loadRadarFrames() {
     radarFrames    = [...past, ...nowcast].slice(-12);
 
     // Pre-create all tile layers (hidden)
+    // frame.path is already "/v2/radar/TIMESTAMP" — don't prepend extra path segments
     radarLayers = radarFrames.map(frame =>
       L.tileLayer(
-        `https://tilecache.rainviewer.com/v2/radar/${frame.path}/256/{z}/{x}/{y}/4/1_1.png`,
-        { opacity: 0.65, maxZoom: 15, zIndex: 10 }
+        `https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/4/1_1.png`,
+        { opacity: 0.7, maxZoom: 15, zIndex: 10 }
       )
     );
 
