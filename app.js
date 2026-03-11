@@ -273,6 +273,7 @@ async function loadWeather() {
 
     render(data);
     applyBackground();
+    if (!radarMap) initRadar();
 
     document.getElementById('lastUpdated').textContent =
       `Updated ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: TIMEZONE })} CT`;
@@ -288,6 +289,107 @@ async function loadWeather() {
       </div>`;
   }
 }
+
+// ─── Radar Map ───────────────────────────────────────────
+let radarMap       = null;
+let radarLayers    = [];
+let radarFrames    = [];
+let radarIdx       = 0;
+let radarPlaying   = true;
+let radarTimer     = null;
+const RADAR_SPEED  = 600; // ms per frame
+
+function initRadar() {
+  // Init Leaflet map centred on Chicago
+  radarMap = L.map('radarMap', {
+    center: [41.85, -87.65],
+    zoom: 7,
+    zoomControl: true,
+    attributionControl: false,
+  });
+
+  // Dark base tile layer (CartoDB dark matter)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(radarMap);
+
+  // Chicago marker
+  L.circleMarker([41.85, -87.65], {
+    radius: 6,
+    color: '#fff',
+    fillColor: '#60a5fa',
+    fillOpacity: 1,
+    weight: 2,
+  }).bindTooltip('Chicago', { permanent: false, direction: 'top' }).addTo(radarMap);
+
+  loadRadarFrames();
+}
+
+async function loadRadarFrames() {
+  try {
+    const res  = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+    const data = await res.json();
+
+    // Get past radar frames (up to 12) + nowcast if available
+    const past     = data.radar.past     ?? [];
+    const nowcast  = data.radar.nowcast  ?? [];
+    radarFrames    = [...past, ...nowcast].slice(-12);
+
+    // Pre-create all tile layers (hidden)
+    radarLayers = radarFrames.map(frame =>
+      L.tileLayer(
+        `https://tilecache.rainviewer.com/v2/radar/${frame.path}/256/{z}/{x}/{y}/4/1_1.png`,
+        { opacity: 0.65, maxZoom: 15, zIndex: 10 }
+      )
+    );
+
+    // Show latest frame immediately
+    radarIdx = radarLayers.length - 1;
+    showRadarFrame(radarIdx);
+    startRadarLoop();
+  } catch (e) {
+    console.warn('Radar load failed', e);
+    document.getElementById('radarTimestamp').textContent = 'unavailable';
+  }
+}
+
+function showRadarFrame(idx) {
+  // Remove all layers
+  radarLayers.forEach(l => { if (radarMap.hasLayer(l)) radarMap.removeLayer(l); });
+
+  // Add current frame
+  radarLayers[idx].addTo(radarMap);
+
+  // Update UI
+  const ts   = new Date(radarFrames[idx].time * 1000);
+  const lbl  = ts.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: TIMEZONE });
+  document.getElementById('radarFrameLabel').textContent   = lbl;
+  document.getElementById('radarTimestamp').textContent    = `as of ${lbl}`;
+  document.getElementById('radarProgress').style.width     = `${((idx + 1) / radarLayers.length) * 100}%`;
+}
+
+function startRadarLoop() {
+  clearInterval(radarTimer);
+  radarTimer = setInterval(() => {
+    if (!radarPlaying) return;
+    radarIdx = (radarIdx + 1) % radarLayers.length;
+    showRadarFrame(radarIdx);
+  }, RADAR_SPEED);
+}
+
+// Play / Pause button
+document.getElementById('radarPlayBtn').addEventListener('click', () => {
+  radarPlaying = !radarPlaying;
+  const icon = document.getElementById('radarPlayIcon');
+  if (radarPlaying) {
+    // Play icon
+    icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  } else {
+    // Pause icon
+    icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+  }
+});
 
 // ─── Unit Toggle ──────────────────────────────────────────
 document.getElementById('unitBtn').addEventListener('click', () => {

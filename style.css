@@ -319,6 +319,79 @@ body {
   margin-top: auto;
 }
 
+/* ─── Radar ────────────────────────────────────────────── */
+.radar-card { padding-bottom: 16px; }
+
+#radarMap {
+  width: 100%;
+  height: 280px;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Override Leaflet controls to match theme */
+.leaflet-control-zoom a {
+  background: rgba(255,255,255,0.18) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: rgba(255,255,255,0.25) !important;
+  color: #fff !important;
+}
+.leaflet-control-zoom a:hover { background: rgba(255,255,255,0.3) !important; }
+.leaflet-bar { border: none !important; box-shadow: 0 4px 16px rgba(0,0,0,0.2) !important; }
+
+.radar-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.radar-btn {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.28);
+  color: #fff;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.1s;
+}
+.radar-btn:hover  { background: rgba(255,255,255,0.28); }
+.radar-btn:active { transform: scale(0.92); }
+
+.radar-frames {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.radar-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.radar-frame-lbl {
+  font-size: 0.68rem;
+  color: var(--text-2);
+  min-width: 52px;
+  text-align: right;
+}
+
+.radar-ts {
+  margin-left: auto;
+  font-size: 0.65rem;
+  color: var(--text-3);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 /* ─── Responsive ───────────────────────────────────────── */
 @media (max-width: 400px) {
   .temp      { font-size: 76px; letter-spacing: -4px; }

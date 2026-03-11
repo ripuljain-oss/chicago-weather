@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
   <canvas id="weatherCanvas"></canvas>
@@ -82,6 +83,27 @@
           <div id="dailyList" class="daily-list"></div>
         </section>
 
+        <!-- Radar -->
+        <section class="forecast-card glass radar-card">
+          <div class="card-header">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="12"/><line x1="12" y1="12" x2="19" y2="7"/>
+            </svg>
+            Live Radar
+            <span id="radarTimestamp" class="radar-ts"></span>
+          </div>
+          <div id="radarMap"></div>
+          <div class="radar-controls">
+            <button id="radarPlayBtn" class="radar-btn" title="Play/Pause">
+              <svg id="radarPlayIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <div class="radar-frames">
+              <div id="radarProgress" class="radar-progress-bar"></div>
+            </div>
+            <span id="radarFrameLabel" class="radar-frame-lbl">--</span>
+          </div>
+        </section>
+
       </div>
     </main>
 
@@ -91,6 +113,7 @@
     </footer>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
